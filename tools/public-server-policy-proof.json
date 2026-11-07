@@ -1,0 +1,12 @@
+{
+  "repository": "All-The-Mods-10",
+  "revision": "2b2110b2d75be9317036ffc78ee925b16e3e10ac",
+  "status": "PASS",
+  "policy": "steam-only-automatic-server-list-v1",
+  "reviewedInventorySha256": "5d7e88a0654b67d923c64403c7c47e52938306c3b4e6a97ed5997e9ad239e646",
+  "files": 4320,
+  "textFilesChecked": 2424,
+  "personalServerListsModified": false,
+  "checks": "Five common regression tests passed; full reviewed text inventory checked against published SHA; no new gameplay run.",
+  "payloadChanges": []
+}
