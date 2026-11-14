@@ -1,4 +1,4 @@
-"""Restore only the pack's two owned client scripts and validate public native APIs.
+"""Prepare the pack's owned client settings and validate native APIs.
 
 This is source preparation, never a launcher hook or a personal-config writer.
 Unchanged public APIs allow later author JAR versions; changed APIs require review.
@@ -7,6 +7,7 @@ from pathlib import Path
 import argparse
 import hashlib
 import json
+import re
 import struct
 import zipfile
 
@@ -87,6 +88,8 @@ def check_contract(contract, data):
             require(flags & 1 and bool(flags & 8) == expected["static"], "Native member access/static changed")
             if group == "fields":
                 require(not flags & 16, "Native setting is no longer mutable")
+    if "sha256" in contract:
+        require(digest(data) == contract["sha256"], "Review changed native memory warning logic: " + contract["class"])
 
 
 def verify_apis(pack, policy):
@@ -123,6 +126,23 @@ def prepare_outputs(pack, tool, policy, apply=False):
     return len(pending)
 
 
+def prepare_memory_config(pack, apply=False):
+    path = target(pack, "config/memorysettings.json")
+    raw = path.read_bytes()
+    config = json.loads(raw)
+    minimum = config["minimumClient"]["minimumClient"]
+    require(type(minimum) is int and minimum >= 0, "Invalid Memory Settings client minimum")
+    if minimum == 0:
+        return False
+    require(apply, "Memory Settings early client recommendation is enabled")
+    patched, replaced = re.subn(rb'("minimumClient"\s*:\s*)' + str(minimum).encode() + rb'(?=\s*[,}])',
+                                rb'\g<1>0', raw)
+    config["minimumClient"]["minimumClient"] = 0
+    require(replaced == 1 and json.loads(patched) == config, "Review changed Memory Settings configuration layout")
+    path.write_bytes(patched)
+    return True
+
+
 def prepare(pack, apply=False):
     pack = Path(pack).resolve()
     tool = pack / "tools/client-policy"
@@ -130,15 +150,17 @@ def prepare(pack, apply=False):
     require(policy["schemaVersion"] == 1 and policy["kind"] == "pack-owned-native-client-policy", "Unsupported client policy")
     providers = verify_apis(pack, policy)
     restored = prepare_outputs(pack, tool, policy, apply)
+    memory_config_changed = prepare_memory_config(pack, apply)
     return {"status": "PASS", "scope": "Native public API and exact source-script preparation; no runtime or visual acceptance",
             "restoredOwnedScripts": restored, "scripts": policy["scripts"], "nativeApis": providers,
+            "earlyClientMemoryRecommendationDisabled": True, "changedOwnedMemoryConfig": memory_config_changed,
             "personalConfigFilesTouched": False, "gameJarsChanged": False}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pack", type=Path, default=HERE.parents[1])
-    parser.add_argument("--apply", action="store_true", help="Restore missing owned source scripts only")
+    parser.add_argument("--apply", action="store_true", help="Restore owned source scripts and the early client memory setting")
     args = parser.parse_args()
     print(json.dumps(prepare(args.pack, args.apply), indent=2))
 

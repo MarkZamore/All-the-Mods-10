@@ -20,6 +20,7 @@ class ClientPolicyTests(unittest.TestCase):
             "net/raphimc/immediatelyfast/feature/core/ImmediatelyFastConfig",
             "net/raphimc/immediatelyfast/feature/core/ImmediatelyFastRuntimeConfig",
             "com/memorysettings/config/CommonConfiguration",
+            "com/memorysettings/Memory",
             "com/cupboard/config/CupboardConfig",
         ])
         changed = copy.deepcopy(policy)
@@ -49,6 +50,36 @@ class ClientPolicyTests(unittest.TestCase):
                 policy_tool.prepare_outputs(root, tool, policy, True)
             self.assertEqual((root / "kubejs/client_scripts/owned.js").read_bytes(), b"// foreign source file\n")
             self.assertEqual(personal.read_bytes(), before)
+
+    def test_prepare_early_recommendation_changes_only_client_minimum_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "config/memorysettings.json"
+            path.parent.mkdir()
+            before = (b'{\r\n  "minimumClient": {"minimumClient": 7123},'
+                      b'\r\n  "minimumServer": {"minimumServer": 7123},'
+                      b'\r\n  "disableWarnings": {"disableWarnings": false}\r\n}')
+            path.write_bytes(before)
+            with self.assertRaisesRegex(ValueError, "early client recommendation is enabled"):
+                policy_tool.prepare_memory_config(root)
+            self.assertEqual(path.read_bytes(), before)
+            self.assertTrue(policy_tool.prepare_memory_config(root, True))
+            expected = before.replace(b'"minimumClient": 7123', b'"minimumClient": 0')
+            self.assertEqual(path.read_bytes(), expected)
+            self.assertFalse(policy_tool.prepare_memory_config(root))
+            self.assertFalse(policy_tool.prepare_memory_config(root, True))
+            self.assertEqual(path.read_bytes(), expected)
+
+    def test_prepare_rejects_an_ambiguous_minimum(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "config/memorysettings.json"
+            path.parent.mkdir()
+            before = b'{"minimumClient": {"minimumClient": 7123, "minimumClient": 7123}}'
+            path.write_bytes(before)
+            with self.assertRaisesRegex(ValueError, "configuration layout"):
+                policy_tool.prepare_memory_config(root, True)
+            self.assertEqual(path.read_bytes(), before)
 
 
 if __name__ == "__main__":

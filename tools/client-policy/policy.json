@@ -53,6 +53,7 @@
     },
     {
       "class": "com/memorysettings/config/CommonConfiguration",
+      "sha256": "42d06d51ed77499eeb62ed78bef621529ef30805c9d05c9270b28dc35259c04c",
       "fields": [
         {
           "name": "config",
@@ -65,6 +66,10 @@
           "static": false
         }
       ]
+    },
+    {
+      "class": "com/memorysettings/Memory",
+      "sha256": "a571ce43890b20e2e50a2c9127e3127fc2181427b1b1533dbf414c167be3e65c"
     },
     {
       "class": "com/cupboard/config/CupboardConfig",

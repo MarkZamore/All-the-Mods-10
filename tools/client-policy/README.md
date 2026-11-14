@@ -11,12 +11,17 @@ public configuration fields from the exact shipped native mods; no JAR is patche
 - `lanmc_memory_warning_policy.js` sets only Memory Settings' loaded
   `disableWarnings=true` before its initial game-menu panel check. This prevents
   the upper-memory panel for a heap above the author's 32000 MB recommendation.
-  It does not impose a heap limit. Its earlier low-heap Swing dialog and constructor
-  warning log are outside this client-stage policy.
+  It does not impose a heap limit.
 
-Neither script writes a personal JSON file or resets unrelated options. Both
-original author config files remain unchanged; runtime policy can therefore differ
-from the literal JSON value. A future game launch reapplies the pack's policy.
+Memory Settings checks the client heap before KubeJS runs. The pack sets only
+`minimumClient.minimumClient` to zero in `config/memorysettings.json` so the
+early allocation recommendation does not appear. The mod's 32-bit Java check,
+server thresholds, and the launcher's own heap recommendations keep their
+existing behavior. Updates back up a displaced instance config through the
+existing pack-owned files mechanism.
+
+Neither script writes a personal JSON file or resets unrelated options. The
+pack's existing in-menu policy still runs on every launch.
 
 After importing a later author pack, keep this directory and run:
 
@@ -24,20 +29,25 @@ After importing a later author pack, keep this directory and run:
 python tools/client-policy/prepare.py --pack . --apply
 ```
 
-The tool validates the actual JAR public fields/method used by these scripts,
-restores a missing owned script from its hash-pinned template and refuses a
-conflicting source file. It never writes a player config, downloads a mod or edits
-an author JAR. Updated author JARs with the same native API remain supported;
-changed or missing APIs need review. CI runs this before manifest generation.
+The tool checks the native script APIs and the reviewed early-warning bytecode.
+It restores missing scripts from pinned templates and sets the client threshold
+in the prepared source config, preserving its other bytes. Without `--apply`,
+the check refuses to proceed if an author update reintroduced the threshold.
+Changes to the early-warning bytecode require review before publishing. CI
+runs this before manifest generation.
 
-The publication preparation command above checks the current native APIs and
-owned source scripts. The source tests retain the exact five required API
-classes and cover rejection of a missing member,
-missing owned-script restoration, idempotence and preservation of foreign
-source/config bytes without repeating that successful publication smoke check.
-`native-proof.json` separately records actual Rhino evaluation against the
-native current configs and reviewed loader ordering. The user waived a new game
-run for this update, so no new in-game or visual result is claimed.
+The source tests cover rejection of missing native members, restoration of
+owned scripts, the exact client threshold change and idempotence.
+`native-proof.json` records the earlier Rhino check and loader ordering for
+the in-menu policy.
+
+`EarlyMemoryWarningProbe.java` takes absolute paths to the original and
+prepared Memory Settings JSON files. Run with 64-bit Java 21 in a fresh
+directory with the exact NeoForge loader, Memory Settings, Cupboard, Gson and
+logging libraries on the classpath. Omit LWJGL TinyFileDialogs so an attempted
+dialog can be observed without opening a window. The probe compares the real
+Cupboard-loaded configs and tests both the allocation branch and the independent
+Java architecture warning.
 
 ## Reproduce the standalone native check
 

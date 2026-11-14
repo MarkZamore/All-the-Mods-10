@@ -1,0 +1,8 @@
+{
+  "scope": "Exact Java 21, NeoForge 21.1.265, Memory Settings 6.0 and Cupboard 4.2; dialog call intercepted by omitting LWJGL TinyFileDialogs",
+  "sourceBase": "88ec986849892c0308d90b1231bd42d87c86344d",
+  "authorConfigSha256": "8377751d5a0b5f9c80dc878212b2a157739cfcace6a2cb17f5ec225ad0d74f24",
+  "preparedConfigSha256": "52b01667d62cc471b0e9df9d28b79a1dad03d7e2c44478efc985d100fc79e2d1",
+  "probeSourceSha256": "3eebed1aa29e9d66c20e9a0a452a70b94ee8ab861af6129855e48588d5658e05",
+  "testOutput": "PASS native author 6000 MiB warns at 5120 MiB, prepared 0 MiB does not, architecture check still warns"
+}
