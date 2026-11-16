@@ -1,6 +1,6 @@
 # Pack-owned native client policies
 
-The two runtime scripts are ordinary KubeJS client scripts. They run before the
+The runtime scripts are ordinary KubeJS client scripts. They run before the
 initial game menu, independently of LANMinecraft's launch code. They use mutable
 public configuration fields from the exact shipped native mods; no JAR is patched.
 
@@ -13,6 +13,12 @@ public configuration fields from the exact shipped native mods; no JAR is patche
   the upper-memory panel for a heap above the author's 32000 MB recommendation.
   It does not impose a heap limit.
 
+- `lanmc_multiplayer_warning_policy.js` sets Minecraft 1.21.1's loaded
+  `Options.skipMultiplayerWarning` before the title-menu button is used. The
+  native button opens the server list directly, with the normal multiplayer
+  availability check. The script does not write `options.txt` or server lists
+  and applies to both new and existing profiles.
+
 Memory Settings checks the client heap before KubeJS runs. The pack sets only
 `minimumClient.minimumClient` to zero in `config/memorysettings.json` so the
 early allocation recommendation does not appear. The mod's 32-bit Java check,
@@ -20,7 +26,7 @@ server thresholds, and the launcher's own heap recommendations keep their
 existing behavior. Updates back up a displaced instance config through the
 existing pack-owned files mechanism.
 
-Neither script writes a personal JSON file or resets unrelated options. The
+The scripts leave unrelated settings intact. The
 pack's existing in-menu policy still runs on every launch.
 
 After importing a later author pack, keep this directory and run:

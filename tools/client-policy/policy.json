@@ -13,6 +13,12 @@
       "template": "scripts/lanmc_memory_warning_policy.js",
       "sizeBytes": 421,
       "sha256": "68b42fde0072ce3f366605a7619931cb6388575230ca7a910c23580b58cbaeab"
+    },
+    {
+      "path": "kubejs/client_scripts/lanmc_multiplayer_warning_policy.js",
+      "template": "scripts/lanmc_multiplayer_warning_policy.js",
+      "sizeBytes": 121,
+      "sha256": "a6dfa399c31d8349bfa9a72e972f45bff15c755d3bf9de1a8a8a913ec4a0da83"
     }
   ],
   "apiContracts": [
